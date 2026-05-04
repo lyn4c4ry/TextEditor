@@ -20,7 +20,6 @@ public class EditorMenuBar extends JMenuBar {
         this.textArea = textArea;
         add(buildFileMenu());
         add(buildEditMenu());
-        add(buildFormatMenu());
     }
 
     private JMenu buildFileMenu() {
@@ -109,38 +108,15 @@ public class EditorMenuBar extends JMenuBar {
         return editMenu;
     }
 
-    private JMenu buildFormatMenu() {
-        JMenu formatMenu = new JMenu("Format");
-
-        JMenuItem boldItem = new JMenuItem("Bold");
-        JMenuItem italicItem = new JMenuItem("Italic");
-        JMenuItem boldItalicItem = new JMenuItem("Bold + Italic");
-
-        // Keyboard shortcuts
-        boldItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK));
-        italicItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK));
-
-        boldItem.addActionListener(e -> applyFormat(new BoldDecorator(new BaseFormatter())));
-        italicItem.addActionListener(e -> applyFormat(new ItalicDecorator(new BaseFormatter())));
-        boldItalicItem.addActionListener(e -> applyFormat(
-                new BoldDecorator(new ItalicDecorator(new BaseFormatter()))
-        ));
-
-        formatMenu.add(boldItem);
-        formatMenu.add(italicItem);
-        formatMenu.add(boldItalicItem);
-
-        return formatMenu;
-    }
-
     // Decorator Pattern - applies formatting to selected text
-    private void applyFormat(TextFormatter formatter) {
-        String selected = textArea.getSelectedText();
-        if (selected != null && !selected.isEmpty()) {
-            String formatted = formatter.format(selected);
-            textArea.replaceSelection(formatted);
-        } else {
-            JOptionPane.showMessageDialog(this, "Please select text first.");
+    private void applyFormat(String type) {
+        switch (type) {
+            case "bold" -> textArea.toggleBold();
+            case "italic" -> textArea.toggleItalic();
+            case "bolditalic" -> {
+                textArea.toggleBold();
+                textArea.toggleItalic();
+            }
         }
     }
 }
