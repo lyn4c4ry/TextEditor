@@ -38,8 +38,7 @@ public class EditorMenuBar extends JMenuBar {
         openItem.addActionListener(e -> {
             EditorApp.getInstance().getCommandManager().executeCommand(
                     new OpenFileCommand(
-                            EditorApp.getInstance().getDocument(),
-                            EditorApp.getInstance().getCaretaker()
+                            EditorApp.getInstance().getDocument()
                     )
             );
             textArea.syncFromModel();

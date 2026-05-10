@@ -66,18 +66,6 @@ public class Document {
         notifyObservers("modifiedChanged");
     }
 
-    // Memento Pattern - take a snapshot of current content
-    public EditorMemento createMemento() {
-        return new EditorMemento(content.toString());
-    }
-
-    // Memento Pattern - restore content from a snapshot
-    public void restoreFromMemento(EditorMemento memento) {
-        this.content = new StringBuilder(memento.getContent());
-        this.isModified = true;
-        notifyObservers("contentChanged");
-    }
-
     // Observer Pattern - register a new observer
     public void addObserver(EditorObserver observer) {
         observers.add(observer);
