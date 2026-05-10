@@ -1,7 +1,6 @@
 package editor.command;
 
 import editor.model.Document;
-import editor.model.EditorCaretaker;
 
 import javax.swing.*;
 import java.io.*;
@@ -13,13 +12,11 @@ import java.nio.file.*;
 public class OpenFileCommand implements Command {
 
     private final Document document;
-    private final EditorCaretaker caretaker;
     private String previousContent;
     private String previousFilePath;
 
-    public OpenFileCommand(Document document, EditorCaretaker caretaker) {
+    public OpenFileCommand(Document document) {
         this.document = document;
-        this.caretaker = caretaker;
     }
 
     @Override
@@ -32,7 +29,6 @@ public class OpenFileCommand implements Command {
                 // Save current state before opening new file
                 previousContent = document.getContent();
                 previousFilePath = document.getFilePath();
-                caretaker.save(document.createMemento());
 
                 File file = fileChooser.getSelectedFile();
                 String content = Files.readString(file.toPath());

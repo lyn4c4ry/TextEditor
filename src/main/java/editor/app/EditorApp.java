@@ -2,7 +2,6 @@ package editor.app;
 
 import editor.command.CommandManager;
 import editor.model.Document;
-import editor.model.EditorCaretaker;
 
 /**
  * Singleton Pattern - Single instance of the application.
@@ -14,13 +13,11 @@ public class EditorApp {
 
     private final Document document;
     private final CommandManager commandManager;
-    private final EditorCaretaker caretaker;
 
     // Private constructor - cannot be instantiated from outside
     private EditorApp() {
         this.document = new Document();
         this.commandManager = new CommandManager();
-        this.caretaker = new EditorCaretaker();
     }
 
     // Returns the single instance, creates it if it doesn't exist
@@ -39,7 +36,4 @@ public class EditorApp {
         return commandManager;
     }
 
-    public EditorCaretaker getCaretaker() {
-        return caretaker;
-    }
 }

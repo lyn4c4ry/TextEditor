@@ -24,7 +24,6 @@ A simple yet feature-rich text editor built with Java Swing, inspired by Windows
 | **Singleton** | `EditorApp` | Single application instance, global access point for Document and CommandManager |
 | **Command** | `CommandManager`, `OpenFileCommand`, `SaveFileCommand`, `SaveAsFileCommand` | Encapsulates every action as an object, enables Undo/Redo |
 | **Observer** | `EditorObserver`, `Document`, `StatusBar` | Automatically updates status bar and title when document changes |
-| **Memento** | `EditorMemento`, `EditorCaretaker` | Stores document snapshots to support undo operations |
 | **Strategy** | `SearchStrategy`, `SimpleSearchStrategy`, `RegexSearchStrategy` | Swappable search algorithms (normal vs regex) at runtime |
 | **Decorator** | `TextFormatter`, `BaseFormatter`, `BoldDecorator`, `ItalicDecorator` | Dynamically applies text formatting without modifying the base class |
 
