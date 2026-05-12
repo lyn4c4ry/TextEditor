@@ -84,13 +84,11 @@ mvn test
 src/
 ├── main/java/editor/
 │   ├── app/          → Main, EditorApp (Singleton)
-│   ├── model/        → Document, EditorMemento, EditorCaretaker
+│   ├── model/        → Document
 │   ├── command/      → Command interface, CommandManager, all file commands
 │   ├── observer/     → EditorObserver interface
 │   ├── strategy/     → SearchStrategy, SimpleSearchStrategy, RegexSearchStrategy
 │   ├── decorator/    → TextFormatter, BaseFormatter, BoldDecorator, ItalicDecorator
 │   └── ui/           → MainFrame, EditorMenuBar, EditorTextArea, EditorToolBar, FindDialog, StatusBar
-└── test/java/editor/
-    ├── CommandManagerTest
-    └── DocumentTest
+└── test/java/editor/ → CommandManagerTest, DocumentTest, SearchStrategyTest
 ```
