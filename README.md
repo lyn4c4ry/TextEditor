@@ -82,7 +82,7 @@ mvn test
 
 ```
 src/
-├── main/java/editor/
+├── main/java/editor/ 
 │   ├── app/          → Main, EditorApp (Singleton)
 │   ├── model/        → Document
 │   ├── command/      → Command interface, CommandManager, all file commands
