@@ -36,6 +36,13 @@ public class FindDialog extends JDialog {
         super(parent, "Find", false);
         this.textArea = textArea;
         this.strategy = new SimpleSearchStrategy();
+        // Pencere kapandığında renkleri temizle
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                clearHighlights();
+            }
+        });
 
         setLayout(new BorderLayout(10, 10));
         setSize(450, 150);
@@ -129,31 +136,46 @@ public class FindDialog extends JDialog {
         highlighter.removeAllHighlights();
 
         String query = searchField.getText();
-        int queryLength = query.length(); // Simplified; Regex might need actual match length
+        String content = textArea.getText();
 
         for (int i = 0; i < results.size(); i++) {
             try {
                 int start = results.get(i);
-                int end = start + queryLength;
+                int end;
 
-                // Differentiate current match with a different color
+                // UML'i bozmamak için uzunluğu burada hesaplıyoruz
+                if (regexCheckBox.isSelected()) {
+                    // Regex ise gerçek eşleşme uzunluğunu bul
+                    java.util.regex.Pattern p = java.util.regex.Pattern.compile(query);
+                    java.util.regex.Matcher m = p.matcher(content);
+                    if (m.find(start)) {
+                        end = m.end(); // Regex'in bittiği gerçek yer
+                    } else {
+                        end = start + query.length();
+                    }
+                } else {
+                    // Normal arama ise direkt query length
+                    end = start + query.length();
+                }
+
                 Highlighter.HighlightPainter painter = (i == currentIndex) ? currentPainter : generalPainter;
                 highlighter.addHighlight(start, end, painter);
 
-                // Ensure the focused match is selected and visible
                 if (i == currentIndex) {
                     textArea.requestFocus();
                     textArea.select(start, end);
                     textArea.setCaretPosition(end);
                 }
-            } catch (BadLocationException ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
     }
 
     private void clearHighlights() {
-        textArea.getHighlighter().removeAllHighlights();
+        if (textArea != null && textArea.getHighlighter() != null) {
+            textArea.getHighlighter().removeAllHighlights();
+        }
     }
 
     private void updateUI() {

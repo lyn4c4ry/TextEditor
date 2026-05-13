@@ -60,4 +60,23 @@ class SearchStrategyTest {
         List<Integer> results = strategy.search(content, "[a-z+");
         assertTrue(results.isEmpty(), "Should handle invalid regex gracefully and return empty list.");
     }
+
+    @Test
+    void testRegexActualMatchLength() {
+        SearchStrategy strategy = new RegexSearchStrategy();
+        String content = "For Those Who Come After";
+        String query = "\\b\\w{4}\\b"; // A regex pattern that is 9 characters long
+
+        // Run the strategy
+        List<Integer> results = strategy.search(content, query);
+
+        // Get the index of the first result
+        int startIndex = results.get(0);
+
+        // Test: Check the actual length of the word found by Regex
+        // If you updated the logic in FindDialog,
+        // you should see that it doesn't go beyond the word "Come" (4 letters) with a manual test.
+        assertEquals(14, startIndex, "Should find 'Come' at index 14.");
+    }
+
 }
