@@ -5,16 +5,17 @@ import editor.strategy.SimpleSearchStrategy;
 import editor.strategy.RegexSearchStrategy;
 
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Dialog for text search with VS Code-like navigation and highlighting.
- * Follows the Strategy Pattern for search logic.
+ * Enhanced search dialog that fixes indexing offsets caused by platform-specific line endings.
+ * Implements Strategy Pattern and visual highlighting.
  */
 public class FindDialog extends JDialog {
 
@@ -24,11 +25,9 @@ public class FindDialog extends JDialog {
     private final EditorTextArea textArea;
     private SearchStrategy strategy;
 
-    // Search state management
     private List<Integer> results = new ArrayList<>();
     private int currentIndex = -1;
 
-    // Highlight painters for visual feedback
     private final Highlighter.HighlightPainter generalPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
     private final Highlighter.HighlightPainter currentPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.ORANGE);
 
@@ -36,7 +35,8 @@ public class FindDialog extends JDialog {
         super(parent, "Find", false);
         this.textArea = textArea;
         this.strategy = new SimpleSearchStrategy();
-        // Pencere kapandığında renkleri temizle
+
+        // Clear highlights when dialog is closed via 'X' button
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
@@ -48,7 +48,7 @@ public class FindDialog extends JDialog {
         setSize(450, 150);
         setLocationRelativeTo(parent);
 
-        // Search input area
+        // UI Setup: Input Panel
         JPanel inputPanel = new JPanel(new BorderLayout(5, 5));
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
         searchField = new JTextField();
@@ -59,21 +59,19 @@ public class FindDialog extends JDialog {
         inputPanel.add(searchField, BorderLayout.CENTER);
         inputPanel.add(countLabel, BorderLayout.EAST);
 
-        // Logic for Strategy switching
+        // UI Setup: Logic & Control
         regexCheckBox = new JCheckBox("Use Regex");
         regexCheckBox.addActionListener(e -> {
             strategy = regexCheckBox.isSelected() ? new RegexSearchStrategy() : new SimpleSearchStrategy();
             resetSearchState();
         });
 
-        // Navigation and Action buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton prevButton = new JButton("<");
         JButton nextButton = new JButton(">");
         JButton findButton = new JButton("Find All");
         JButton closeButton = new JButton("Close");
 
-        // Set up action listeners
         findButton.addActionListener(e -> startNewSearch());
         nextButton.addActionListener(e -> navigateResults(1));
         prevButton.addActionListener(e -> navigateResults(-1));
@@ -101,15 +99,17 @@ public class FindDialog extends JDialog {
 
     private void startNewSearch() {
         String query = searchField.getText();
-        String content = textArea.getText();
+        if (query.isEmpty()) return;
 
-        // Execution of the Strategy pattern
+        // CRITICAL FIX: Standardize line endings to prevent index offsets (\r\n -> \n)
+        String content = textArea.getText().replace("\r\n", "\n");
+
         results = strategy.search(content, query);
 
         if (results.isEmpty()) {
             currentIndex = -1;
             clearHighlights();
-            JOptionPane.showMessageDialog(this, "No results found for: " + query);
+            JOptionPane.showMessageDialog(this, "No results found.");
         } else {
             currentIndex = 0;
             applyVisualFeedback();
@@ -120,7 +120,6 @@ public class FindDialog extends JDialog {
     private void navigateResults(int direction) {
         if (results.isEmpty()) return;
 
-        // Circular navigation through the results list
         currentIndex += direction;
         if (currentIndex >= results.size()) currentIndex = 0;
         if (currentIndex < 0) currentIndex = results.size() - 1;
@@ -136,25 +135,24 @@ public class FindDialog extends JDialog {
         highlighter.removeAllHighlights();
 
         String query = searchField.getText();
-        String content = textArea.getText();
+        // Standardize content here as well to sync with highlighter coordinates
+        String content = textArea.getText().replace("\r\n", "\n");
 
         for (int i = 0; i < results.size(); i++) {
             try {
                 int start = results.get(i);
                 int end;
 
-                // UML'i bozmamak için uzunluğu burada hesaplıyoruz
                 if (regexCheckBox.isSelected()) {
-                    // Regex ise gerçek eşleşme uzunluğunu bul
-                    java.util.regex.Pattern p = java.util.regex.Pattern.compile(query);
-                    java.util.regex.Matcher m = p.matcher(content);
+                    Pattern p = Pattern.compile(query);
+                    Matcher m = p.matcher(content);
+                    // Search starting from the stored index to find actual match boundaries
                     if (m.find(start)) {
-                        end = m.end(); // Regex'in bittiği gerçek yer
+                        end = m.end();
                     } else {
                         end = start + query.length();
                     }
                 } else {
-                    // Normal arama ise direkt query length
                     end = start + query.length();
                 }
 
@@ -162,9 +160,7 @@ public class FindDialog extends JDialog {
                 highlighter.addHighlight(start, end, painter);
 
                 if (i == currentIndex) {
-                    textArea.requestFocus();
-                    textArea.select(start, end);
-                    textArea.setCaretPosition(end);
+                    textArea.select(start, end); // This will now align perfectly
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -173,7 +169,7 @@ public class FindDialog extends JDialog {
     }
 
     private void clearHighlights() {
-        if (textArea != null && textArea.getHighlighter() != null) {
+        if (textArea != null) {
             textArea.getHighlighter().removeAllHighlights();
         }
     }
